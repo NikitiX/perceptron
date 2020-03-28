@@ -2,17 +2,19 @@
 
 using namespace std;
 
-Perceptron::Perceptron(vector<double> f_coefficients) {
-    num_of_inputs = f_coefficients.size();
-    coefficients = f_coefficients;
+Perceptron::Perceptron(int n) {
+    num_of_inputs = n;
+    for (int i = 0; i < n; i++) {
+        coefficients.push_back(static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5);
+    }
 };
 
-return_code Perceptron::set_inputs(vector<double> a_inputs) {
+bool Perceptron::set_inputs(vector<double> a_inputs) {
     if (a_inputs.size() != num_of_inputs - 1) {
-        return ERROR;
+        return false;
     }
     inputs = a_inputs;
-    return SUCCESS;
+    return true;
 };
 
 double Perceptron::get_output() {
@@ -25,10 +27,10 @@ double Perceptron::get_output() {
 
 int main()
 {
-    vector<double> c = {0.5,1.5,1};
-    vector<double> inputs = {0,0.5};
-    Perceptron p(c);
-    if (p.set_inputs(inputs)) {
+    srand (static_cast <unsigned> (time(0)));
+    vector<double> inputs = {0.5,1};
+    Perceptron p(3);
+    if (!p.set_inputs(inputs)) {
         cout << "Failed to load inputs into the perceptron.";
     } else {
         cout << "The result is " << p.get_output();
