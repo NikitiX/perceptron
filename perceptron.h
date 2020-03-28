@@ -3,13 +3,12 @@
 
 using namespace std;
 
+enum return_code {SUCCESS, ERROR};
+
 class Perceptron {
 public:
     Perceptron(vector<double> f_coefficients);
-    int set_inputs(vector<double> a_inputs);
-    int set_input(int index, double value);
-    int set_coefficients(vector<double> a_coefficients);
-    int set_coefficient(int index, double value);
+    return_code set_inputs(vector<double> a_inputs);
     double get_output();
 private:
     vector<double> inputs;
