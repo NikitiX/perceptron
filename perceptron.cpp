@@ -1,9 +1,13 @@
-#include "perceptron.h"
+/*
+TODO:
+Add R-layer
+Check if it is working
+*/
 
-using namespace std;
+#include "layers.h"
 
 double random() {
-    return static_cast <double> (rand()) / static_cast <double> (RAND_MAX);
+    return ;// TODO
 };
 
 Perceptron::Perceptron(unsigned int n,double l=0.3,double e=0.001) {
@@ -64,26 +68,138 @@ void Perceptron::print() {
     cout << endl;
 };
 
-int main()
-{
-    srand(static_cast <unsigned> (time(0)));
-    Perceptron p(3);
-    int right_answers = 0;
-    while (true) {
-        double a = random();
-        double b = random();
-        vector<double> inputs = {a,b};
-        //cout << "Learning a - (b/2): ";
-        //p.print();
-        p.set_inputs(inputs);
-        double real_answer = a - (b / 2.);
-        //cout << "Inputs: " << a << ' ' << b << ", the real answer is " << real_answer << ", the perceptron answer is " << p.get_output() << endl;
-        if (p.learn(real_answer)) {
-            if (++right_answers == 10) {
-                break;
-            }
-        } else {
-            right_answers = 0;
-        }
-    }
+ALayer::ALayer() {};
+void ALayer::connect() {};
+void ALayer::update() {};
+double ALayer::get_output() {};
+
+bool Sensor::set_state (int n_state) {
+    if ((n_state < 0) || (n_state > 2)) return false;
+    state = n_state;
+    return true;
+};
+
+int Sensor::get_state () {
+    return state;
+};
+
+void SLayer::add_sensor(Sensor sensor) {
+    sensors.push_back(sensor);
+};
+
+bool SLayer::set_outputs(vector<int> outputs) {
+    if (outputs.size() != sensors.size()) return false;
+    for (int i = 0; i < outputs.size(); i++) if ((outputs[i] < 0) || (outputs[i] > 1)) return false;
+    for (int i = 0; i < outputs.size(); i++) sensors[i].set_output(outputs[i]);
+};
+
+int SLayer::get_output(int s_index) {
+    if ((s_index < 0) || (s_index > sensors.size())) {return -2147483648;}
+    return sensors[s_index].get_state();
 }
+
+ASLayer::ASLayer (SLayer prev) {prevLayer = prev};
+
+bool ASLayer::check_correct(int index) {
+    if ((index < 0) || (index > saconnections.size())) {
+        return false;
+    }
+    return true;
+};
+
+int ASLayer::connect(int p_index,int s_index) {
+    if (!check_correct(p_index)) {return false;}
+    if (p_index == saconnections.size()) {
+        vector<int> tmp;
+        tmp.push_back(s_index);
+        saconnections.push_back(tmp);
+    }
+    else {saconnections[i].push_back(s_index);}
+    return true;
+};
+
+int ASLayer::connect(int p_index,vector<int> s_indexes) {
+    if (!check_correct(p_index)) {return false;}
+    if (p_index == saconnections.size()) {
+        saconnections.push_back(s_indexes);
+    }
+    else {saconnections[i] = s_indexes;}
+    return true;
+};
+
+void ASLayer::initialize() {
+    for (int i = 0 ; i < saconnections.size(); i++) {
+        perceptrons.push_back(Perceptron(saconnections[i].size()));
+    }
+    update();
+}
+
+void ASLayer::update() {
+    for (int i = 0; i < perceptrons.size(); i++) {
+        vector<int> tmp;
+        for (auto& index : saconnections[i]) {
+            tmp.push_back(prevLayer.get_output(index));
+        }
+        perceptrons[i].set_inputs(tmp);
+        output[i] = perceptrons[i].get_output();
+    }
+};
+
+double ASLayer::get_output(int index) {
+    return output[index];
+};
+
+ASLayer::ASLayer (ALayer prev) {prevLayer = prev};
+
+bool ASLayer::check_correct(int index) {
+    if ((index < 0) || (index > saconnections.size())) {
+        return false;
+    }
+    return true;
+};
+
+int ASLayer::connect(int p_index,int s_index) {
+    if (!check_correct(p_index)) {return false;}
+    if (p_index == saconnections.size()) {
+        vector<int> tmp;
+        tmp.push_back(s_index);
+        saconnections.push_back(tmp);
+    }
+    else {saconnections[i].push_back(s_index);}
+    return true;
+};
+
+int ASLayer::connect(int p_index,vector<int> s_indexes) {
+    if (!check_correct(p_index)) {return false;}
+    if (p_index == saconnections.size()) {
+        saconnections.push_back(s_indexes);
+    }
+    else {saconnections[i] = s_indexes;}
+    return true;
+};
+
+void ASLayer::initialize() {
+    for (int i = 0 ; i < saconnections.size(); i++) {
+        perceptrons.push_back(Perceptron(saconnections[i].size()));
+    }
+    update();
+}
+
+void ASLayer::update() {
+    for (int i = 0; i < perceptrons.size(); i++) {
+        vector<int> tmp;
+        for (auto& index : saconnections[i]) {
+            tmp.push_back(prevLayer.get_output(index));
+        }
+        perceptrons[i].set_inputs(tmp);
+        output[i] = perceptrons[i].get_output();
+    }
+};
+
+double ASLayer::get_output(int index) {
+    return output[index];
+};
+
+int main() {
+
+};
